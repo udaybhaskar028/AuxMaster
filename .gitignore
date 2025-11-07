@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite
+*.db
+.env
+.mypy_cache/
+.pytest_cache/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Node (future use)
+node_modules/
+
+# Docker
+*.pid
