@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuxMaster | Smart Song Recommender</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center p-8">
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-blue-400">AuxMaster</h1>
+    <p class="text-sm text-gray-400">AI-Powered Song Recommendations</p>
+  </header>
+
+  <main class="w-full max-w-2xl">
+    <div class="flex gap-2 mb-6">
+      <input
+        id="query"
+        type="text"
+        placeholder="Enter a song title..."
+        class="flex-grow p-2 rounded bg-gray-800 text-gray-100 border border-gray-700"
+      />
+      <button
+        id="searchBtn"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        Search
+      </button>
+    </div>
+
+    <div id="results" class="space-y-4"></div>
+  </main>
+
+  <footer class="mt-10 text-gray-600 text-sm">
+    <p>Built with FastAPI + ML by AuxMaster</p>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
