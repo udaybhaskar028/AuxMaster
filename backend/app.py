@@ -8,13 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import bindparam, text
 
-# IMPORTANT: absolute imports so Render doesn't get confused
 from backend.model import ContentRecommender
-from backend.db import engine, init_db
+from backend.db import get_engine, init_db
 
-# -----------------------------------------------------------------------------
-# ASGI app object (must be named 'app' at module top-level)
-# -----------------------------------------------------------------------------
 app = FastAPI(title="AuxMaster API", version="1.0")
 
 # CORS
@@ -27,30 +23,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# DB + model init
+# Init DB + model
 init_db()
 recommender = ContentRecommender()
 
-# -----------------------------------------------------------------------------
-# Schemas
-# -----------------------------------------------------------------------------
 class RecommendRequest(BaseModel):
     query: str
     k: int = 10
-
 
 class FeedbackRequest(BaseModel):
     track_id: int
     liked: bool
 
-
-# -----------------------------------------------------------------------------
-# Routes
-# -----------------------------------------------------------------------------
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
 
 @app.post("/recommend")
 def recommend(req: RecommendRequest):
@@ -62,6 +49,7 @@ def recommend(req: RecommendRequest):
     feedback_map = {}
 
     if ids:
+        eng = get_engine()
         stmt = (
             text(
                 "SELECT track_id, "
@@ -69,7 +57,7 @@ def recommend(req: RecommendRequest):
                 "FROM feedback WHERE track_id IN :ids GROUP BY track_id"
             ).bindparams(bindparam("ids", expanding=True))
         )
-        with engine.begin() as conn:
+        with eng.begin() as conn:
             rows = conn.execute(stmt, {"ids": ids}).mappings().all()
         feedback_map = {int(r["track_id"]): int(r["score"]) for r in rows}
 
@@ -80,10 +68,10 @@ def recommend(req: RecommendRequest):
     results.sort(key=lambda x: x["adjusted_score"], reverse=True)
     return {"results": results}
 
-
 @app.post("/feedback")
 def feedback(req: FeedbackRequest):
-    with engine.begin() as conn:
+    eng = get_engine()
+    with eng.begin() as conn:
         conn.execute(
             text("INSERT INTO feedback (track_id, liked) VALUES (:tid, :liked)"),
             {"tid": req.track_id, "liked": 1 if req.liked else 0},
